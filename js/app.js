@@ -23,7 +23,11 @@ class Presupuesto {
 
     nuevoGasto(gasto) {
         this.gastos = [...this.gastos, gasto];
-        console.log(this.gastos);
+        this.calcularRestante();
+    }
+
+    calcularRestante() {
+        const gastado = this.gastos.reduce( (total, gasto) => total + gasto.cantidad, 0 );
     }
 
 }
@@ -58,8 +62,52 @@ class UI {
         setTimeout(() => {
             divMensaje.remove();
         }, 3000);
+
+    }
+    
+    agregarGastoListado(gastos) {
+        
+        this.limpiarLista()
+        
+        // iterar sobre los gastos
+        gastos.forEach(gasto => {
+
+            const { cantidad, nombre, id } = gasto;
+
+            // Crear un LI con
+            const nuevoGasto = document.createElement('li');
+            nuevoGasto.className = 'list-group-item d-flex justify-content-between align-items-center';
+            // nuevoGasto.setAttribute('data-id', id);
+            nuevoGasto.dataset.id = id; // hace lo mismo q (setAttribute)
+
+            // Agregar el HMTL del gasto
+            nuevoGasto.innerHTML = `
+                ${nombre}<span class="badge badge-primary badge-pill"> $${cantidad} </span>
+            `;
+
+            // Boton para borrar el gasto gasto
+            const btnBorrar = document.createElement('button');
+            btnBorrar.classList.add('btn', 'btn-danger', 'borrar-gasto');
+            btnBorrar.innerHTML = 'Borrar &times;';
+
+            // Agregando boton cerrar al li del gasto
+            nuevoGasto.appendChild(btnBorrar)
+
+            // Agregar al HTML
+            gastoListado.appendChild(nuevoGasto);
+
+        })
+    }
+
+     limpiarLista() {
+        while (gastoListado.firstChild) {
+            gastoListado.removeChild(gastoListado.firstChild);
+        }
     }
 }
+
+
+
 
 // Instanciar 
 const ui = new UI();
@@ -74,6 +122,7 @@ function preguntarPresupuesto() {
 
     if(presupuestoUsuario === '' || presupuestoUsuario === null || isNaN(presupuestoUsuario) || presupuestoUsuario <= 0) {
         window.location.reload();
+        return;
     }
 
     // Presupuesto valido
@@ -109,6 +158,10 @@ function agregarGasto(e) {
 
     // Imprimir alerta
     ui.imprimirAlerta('Gasto Agregado corretamente');
+
+    // Imprimir los gastos
+    const { gastos } = presupuesto;
+    ui.agregarGastoListado(gastos);
 
     formulario.reset();
 }  
